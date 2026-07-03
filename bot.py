@@ -1,3 +1,4 @@
+from database import movies
 from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
