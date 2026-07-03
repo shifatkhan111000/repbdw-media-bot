@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
