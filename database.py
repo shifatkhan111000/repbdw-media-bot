@@ -22,3 +22,9 @@ def get_movie(name):
             "$options": "i"
         }
     })
+def add_movie(name, year, file_id):
+    movies.insert_one({
+        "name": name,
+        "year": year,
+        "file_id": file_id
+    })
