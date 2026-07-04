@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from database import get_movie
+from database import get_movie, add_movie
+from config import ADMIN_ID
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -50,3 +51,16 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"⚠️ Internal Error:\n{e}"
         )
+# Temporary Add Movie Command
+
+async def addmovie(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text("❌ You are not Admin.")
+        return
+
+    await update.message.reply_text(
+        "✅ Admin verified!\n\n"
+        "🎬 /addmovie system is ready.\n"
+        "Next step: Movie Name → Year → File."
+    )
