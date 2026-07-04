@@ -14,7 +14,8 @@ def main():
 
     # Commands
     app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("addmovie", addmovie))
+    app.add_handler(CommandHandler("addmovie", addmovie))
+
     # Movie Search
     app.add_handler(
         MessageHandler(
