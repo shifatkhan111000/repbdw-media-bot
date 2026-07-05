@@ -1,17 +1,15 @@
 from telegram import Update
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-    CommandHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import ContextTypes, ConversationHandler
 from database import get_movie, add_movie
 from config import ADMIN_ID
+
+# Conversation States
 MOVIE_NAME = 1
 MOVIE_YEAR = 2
 MOVIE_FILE = 3
 
+
+# -------------------- START --------------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -21,46 +19,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# -------------------- SEARCH --------------------
+
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        # Check if message exists
-        if not update.message or not update.message.text:
-            return
+    movie_name = update.message.text.strip()
 
-        movie_name = update.message.text.strip()
+    movie = get_movie(movie_name)
 
-        # Empty message
-        if movie_name == "":
-            await update.message.reply_text("❌ Please enter a movie name.")
-            return
-
-        # Search MongoDB
-        movie = get_movie(movie_name)
-
-        if movie:
-            name = movie.get("name", "Unknown")
-            year = movie.get("year", "Unknown")
-            file_id = movie.get("file_id", "Not Available")
-
-            await update.message.reply_text(
-                f"🎬 {name}\n"
-                f"📅 {year}\n\n"
-                f"📥 File ID:\n{file_id}"
-            )
-
-        else:
-            await update.message.reply_text(
-                f"🔍 You searched: {movie_name}\n\n"
-                "❌ Movie not found."
-            )
-
-    except Exception as e:
-        print("ERROR:", e)
-
+    if movie:
         await update.message.reply_text(
-            f"⚠️ Internal Error:\n{e}"
+            f"🎬 {movie['name']}\n"
+            f"📅 {movie['year']}\n\n"
+            f"📥 File ID:\n{movie['file_id']}"
         )
-# Temporary Add Movie Command
+    else:
+        await update.message.reply_text(
+            "❌ Movie not found."
+        )
+
+
+# -------------------- ADD MOVIE --------------------
 
 async def addmovie(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -69,7 +47,69 @@ async def addmovie(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     await update.message.reply_text(
-        "🎬 Send Movie Name:"
+        "🎬 Enter Movie Name:"
     )
 
     return MOVIE_NAME
+
+
+async def movie_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["movie_name"] = update.message.text.strip()
+
+    await update.message.reply_text(
+        "📅 Enter Release Year:"
+    )
+
+    return MOVIE_YEAR
+
+
+async def movie_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data["movie_year"] = update.message.text.strip()
+
+    await update.message.reply_text(
+        "🎥 Send the Movie File (Video or Document):"
+    )
+
+    return MOVIE_FILE
+
+
+async def movie_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.message.video:
+        file_id = update.message.video.file_id
+
+    elif update.message.document:
+        file_id = update.message.document.file_id
+
+    else:
+        await update.message.reply_text(
+            "❌ Please send a Video or Document."
+        )
+        return MOVIE_FILE
+
+    add_movie(
+        context.user_data["movie_name"],
+        context.user_data["movie_year"],
+        file_id
+    )
+
+    await update.message.reply_text(
+        "✅ Movie Saved Successfully!"
+    )
+
+    context.user_data.clear()
+
+    return ConversationHandler.END
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data.clear()
+
+    await update.message.reply_text(
+        "❌ Movie adding cancelled."
+    )
+
+    return ConversationHandler.END
