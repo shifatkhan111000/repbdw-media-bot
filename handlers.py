@@ -1,7 +1,16 @@
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import (
+    ContextTypes,
+    ConversationHandler,
+    CommandHandler,
+    MessageHandler,
+    filters,
+)
 from database import get_movie, add_movie
 from config import ADMIN_ID
+MOVIE_NAME = 1
+MOVIE_YEAR = 2
+MOVIE_FILE = 3
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -57,10 +66,10 @@ async def addmovie(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text("❌ You are not Admin.")
-        return
+        return ConversationHandler.END
 
     await update.message.reply_text(
-        "✅ Admin verified!\n\n"
-        "🎬 /addmovie system is ready.\n"
-        "Next step: Movie Name → Year → File."
+        "🎬 Send Movie Name:"
     )
+
+    return MOVIE_NAME
