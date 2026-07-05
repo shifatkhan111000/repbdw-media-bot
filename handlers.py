@@ -4,6 +4,9 @@ from database import get_movie, add_movie
 from config import ADMIN_ID
 
 # Conversation States
+MOVIE_NAME, MOVIE_YEAR, MOVIE_FILE = range(3)
+
+# Conversation States
 MOVIE_NAME = 1
 MOVIE_YEAR = 2
 MOVIE_FILE = 3
