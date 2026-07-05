@@ -5,7 +5,10 @@ from config import ADMIN_ID
 
 # Conversation States
 MOVIE_NAME, MOVIE_YEAR, MOVIE_FILE = range(3)
-
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
+    await update.message.reply_text("❌ Operation cancelled.")
+    return ConversationHandler.END
 # Conversation States
 MOVIE_NAME = 1
 MOVIE_YEAR = 2
